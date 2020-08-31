@@ -20,7 +20,6 @@
 import * as Either from './either';
 import { fromNullable, just } from './maybe';
 import { always, id, noop } from './utils';
-import { exactMatch, rootMatch, isGlob, globMatch } from './matching';
 
 const maybeTotal = (x) => (x === 'total' ? Either.left(x) : Either.right(x));
 
@@ -99,10 +98,9 @@ export const coveredFilePath = (obj) => {
 };
 
 export const teamAssignment = (teamAssignments) => (obj) => {
-  const name = rootMatch(2)(teamAssignments)(obj);
-
+  console.log(`\n### teamAssignments: \n\t${teamAssignments}`);
   return {
-    team: name,
+    team: '### Write something to grep the assignments :)',
     ...obj,
   };
 };

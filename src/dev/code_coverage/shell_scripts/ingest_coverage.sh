@@ -30,7 +30,7 @@ export DELAY
 TEAM_ASSIGN_PATH=src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt
 
 # Build team assignments dat file
-node scripts/generate_team_assignments.js --dest $TEAM_ASSIGN_PATH
+node scripts/generate_team_assignments.js --verbose --dest $TEAM_ASSIGN_PATH
 
 for x in jest functional; do
   echo "### Ingesting coverage for ${x}"

@@ -36,7 +36,7 @@ import {
 export const enumeratePatterns = (rootPath) => (log) => (patternsMap) => {
   const res = [];
   const resPush = push(res);
-  const logNotFound = notFound(log)
+  const logNotFound = notFound(log);
 
   for (const pattern of patternsMap) {
     const [pathPattern, meta] = pattern;
@@ -53,11 +53,9 @@ export const enumeratePatterns = (rootPath) => (log) => (patternsMap) => {
 
     const pluckMeta = flip2(pluck)(meta);
     const [owner, exclusions] = ['coverageOwner', 'excludeFiles'].map(pluckMeta);
+    const creeper = (x) => creepFsSync(x, [], rootPath, owner, exclusions);
 
     return function creepAllAsGlobs (pathPattern) {
-
-      const creeper = (x) => creepFsSync(x, [], rootPath, owner, exclusions);
-
       return prokGlob(pathPattern)
         .map(creeper)
         .filter(dropEmpty);
@@ -72,18 +70,18 @@ function creepFsSync (dir, xs, rootPath, owner, exclusions) {
   const trimRoot = trim(rootPath);
   const aJoined = joinRoot(dir);
   const isADir = isDir(aJoined);
-  const entries = isADir ? readdirSync(joinRoot(dir)) : [dir];
 
-  entries.forEach((entry) => {
-    const full = isADir ? join(dir, entry) : entry;
-
-    if (statSync(full).isDirectory() && !isBlackListedDir(full)) {
-      xs = creepFsSync(full, xs, rootPath, owner, exclusions);
-    } else {
-      if (isWhiteListedFile(full) && !isExcluded(full, exclusions))
-        xs.push(`${trimRoot(full)} ${owner}`);
-    }
-  });
+  (isADir ? readdirSync(joinRoot(dir)) : [dir])
+    .forEach(maybeRecurse);
 
   return xs;
+
+  function maybeRecurse (entry) {
+    const full = isADir ? join(dir, entry) : entry;
+
+    if (statSync(full).isDirectory() && !isBlackListedDir(full))
+      xs = creepFsSync(full, xs, rootPath, owner, exclusions);
+    else if (isWhiteListedFile(full) && !isExcluded(full, exclusions))
+      xs.push(`${trimRoot(full)} ${owner}`);
+  }
 }
