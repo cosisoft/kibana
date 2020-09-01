@@ -18,8 +18,9 @@
  */
 
 import * as Either from './either';
-import { fromNullable, just } from './maybe';
+import { fromNullable } from './maybe';
 import { always, id, noop } from './utils';
+import shell from 'shelljs';
 
 const maybeTotal = (x) => (x === 'total' ? Either.left(x) : Either.right(x));
 
@@ -97,10 +98,16 @@ export const coveredFilePath = (obj) => {
     .fold(withoutCoveredFilePath, (coveredFilePath) => ({ ...obj, coveredFilePath }));
 };
 
-export const teamAssignment = (teamAssignments) => (obj) => {
-  console.log(`\n### teamAssignments: \n\t${teamAssignments}`);
+export const teamAssignment = (teamAssignmentsPath) => (obj) => {
+  const { coveredFilePath } = obj;
+
+  const team = shell
+    .cat(teamAssignmentsPath)
+    .match(new RegExp(`${coveredFilePath}.*$`, 'gm'))[0]
+    .match(/.+\s{1,3}(.+)$/, 'gm')[1]
+
   return {
-    team: '### Write something to grep the assignments :)',
+    team,
     ...obj,
   };
 };
